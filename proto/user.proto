@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "./proto";
+
+// 고유한 값: nickname
+service UserService {
+  // Get user by id
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+
+  // Save new user
+  rpc SaveUser(SaveUserRequest) returns (UserResponse) {}
+
+  // Get users by name
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {}
+}
+
+message SaveUserRequest {
+  string name = 1;
+  string nickname = 2;
+}
+
+message UserResponse {
+  string id = 1;
+  string name = 2;
+  string nickname = 3;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  UserResponse user = 1;
+  string message = 2;
+}
+
+message GetUsersRequest {
+  string nickname = 1;
+}
+
+message GetUsersResponse {
+  repeated UserResponse users = 1;
+  string message = 2;
+}
