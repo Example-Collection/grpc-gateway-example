@@ -1,0 +1,22 @@
+[
+  {
+    "IndexName": "nickname_idx",
+    "KeySchema": [
+      {
+        "AttributeName": "nickname",
+        "KeyType": "HASH"
+      },
+      {
+        "AttributeName": "created_at",
+        "KeyType": "RANGE"
+      }
+    ],
+    "Projection": {
+      "ProjectionType": "ALL"
+    },
+    "ProvisionedThroughput": {
+      "ReadCapacityUnits": 10,
+      "WriteCapacityUnits": 10
+    }
+  }
+]
