@@ -40,8 +40,8 @@ func (handler *Handler) convertUserToSaveUserResponse(user *model.User) *api.Use
 	}
 }
 
-func (handler *Handler) GetUser(ctx context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
-	user, err := handler.UserService.GetUserByID(ctx, request.Id)
+func (handler *Handler) GetUser(_ context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+	user, err := handler.UserService.GetUserByID(request.Id)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFoundById) {
 			return nil, status.Errorf(codes.NotFound, "user not found(user_id: %s)", request.Id)

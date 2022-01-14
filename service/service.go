@@ -50,11 +50,11 @@ func New(cfg config.DatabaseConfig, db *userdb.DB) *Service {
 	}
 }
 
-func (service *Service) GetUserByID(ctx context.Context, userId string) (*model.User, error) {
+func (service *Service) GetUserByID(userId string) (*model.User, error) {
 	if strings.Trim(userId, " ") == "" {
 		return nil, errors.New("empty userId")
 	}
-	user, err := service.DB.GetUserByID(ctx, userId)
+	user, err := service.DB.GetUserByID(userId)
 	if err != nil {
 		return nil, ErrUserNotFoundById
 	}
