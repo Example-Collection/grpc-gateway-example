@@ -76,8 +76,11 @@ func (db *DB) PutUser(ctx context.Context, user *model.User) error {
 	return nil
 }
 
-//func (db *DB) newUser(ctx context.Context, user *model.User) (*model.User, error) {
-//	result := make(map[string]*dynamodb.AttributeValue)
-//	savedUser := db.User.Put(user)
-//
-//}
+func (db *DB) GetUserByID(ctx context.Context, userId string) (*model.User, error) {
+	var user model.User
+	if err := db.User.Get("user_id", userId).One(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
+
+}

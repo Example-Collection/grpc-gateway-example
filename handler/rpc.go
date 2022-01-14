@@ -32,11 +32,25 @@ func (handler *Handler) convertSaveUserRequestToUserModel(request *api.SaveUserR
 }
 
 func (handler *Handler) convertUserToSaveUserResponse(user *model.User) *api.UserResponse {
-	fmt.Printf("converting... %v", user.CreatedAt)
 	return &api.UserResponse{
 		Id:        user.ID,
 		Name:      user.Name,
 		Nickname:  user.Nickname,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 	}
+}
+
+func (handler *Handler) GetUser(ctx context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+	user, err := handler.UserService.GetUserByID(ctx, request.Id)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFoundById) {
+			return nil, status.Errorf(codes.NotFound, "user not found(user_id: %s)", request.Id)
+		} else {
+			return nil, status.Errorf(codes.Internal, "failed to get user by id(user_id: %s)", request.Id)
+		}
+	}
+	return &api.GetUserResponse{
+		User:    handler.convertUserToSaveUserResponse(user),
+		Message: fmt.Sprintf("Successfully found user with user_id %s", request.Id),
+	}, nil
 }

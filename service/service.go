@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"grpc-gateway-example/config"
@@ -27,7 +26,6 @@ func (service *Service) CreateUser(ctx context.Context, user *model.User) (*mode
 	}
 	user.ID = userID.String()
 	user.CreatedAt = time.Now()
-	fmt.Printf("createdAt: %v", time.Now())
 	savedUser, err := service.DB.CreateUser(ctx, user)
 	if err != nil {
 		return nil, errors.Wrap(err, "DB.CreateUser() failed")
@@ -50,4 +48,15 @@ func New(cfg config.DatabaseConfig, db *userdb.DB) *Service {
 		config: cfg,
 		DB:     db,
 	}
+}
+
+func (service *Service) GetUserByID(ctx context.Context, userId string) (*model.User, error) {
+	if strings.Trim(userId, " ") == "" {
+		return nil, errors.New("empty userId")
+	}
+	user, err := service.DB.GetUserByID(ctx, userId)
+	if err != nil {
+		return nil, ErrUserNotFoundById
+	}
+	return user, nil
 }
