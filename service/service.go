@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"grpc-gateway-example/config"
 	"grpc-gateway-example/model"
 	"grpc-gateway-example/userdb"
@@ -59,4 +61,15 @@ func (service *Service) GetUserByID(userId string) (*model.User, error) {
 		return nil, ErrUserNotFoundById
 	}
 	return user, nil
+}
+
+func (service *Service) GetUsersByNickname(name string) ([]*model.User, error) {
+	if strings.Trim(name, " ") == "" {
+		return nil, errors.New("empty name")
+	}
+	users, err := service.DB.GetUsersByNickname(name)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Error occurred in while processing GetUsers(), %v", err)
+	}
+	return users, nil
 }

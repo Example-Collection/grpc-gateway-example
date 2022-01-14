@@ -83,3 +83,11 @@ func (db *DB) GetUserByID(userId string) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+func (db *DB) GetUsersByNickname(nickname string) ([]*model.User, error) {
+	var users []*model.User
+	if err := db.User.Get("nickname", nickname).Index("nickname_idx").All(&users); err != nil {
+		return nil, err
+	}
+	return users, nil
+}

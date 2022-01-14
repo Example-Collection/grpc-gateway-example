@@ -21,7 +21,7 @@ func (handler *Handler) SaveUser(ctx context.Context, request *api.SaveUserReque
 		}
 		return nil, status.Errorf(codes.Internal, "failed to save user(internal error)")
 	}
-	return handler.convertUserToSaveUserResponse(user), nil
+	return handler.convertUserToUserResponse(user), nil
 }
 
 func (handler *Handler) convertSaveUserRequestToUserModel(request *api.SaveUserRequest) *model.User {
@@ -31,7 +31,7 @@ func (handler *Handler) convertSaveUserRequestToUserModel(request *api.SaveUserR
 	}
 }
 
-func (handler *Handler) convertUserToSaveUserResponse(user *model.User) *api.UserResponse {
+func (handler *Handler) convertUserToUserResponse(user *model.User) *api.UserResponse {
 	return &api.UserResponse{
 		Id:        user.ID,
 		Name:      user.Name,
@@ -50,7 +50,30 @@ func (handler *Handler) GetUser(_ context.Context, request *api.GetUserRequest) 
 		}
 	}
 	return &api.GetUserResponse{
-		User:    handler.convertUserToSaveUserResponse(user),
+		User:    handler.convertUserToUserResponse(user),
 		Message: fmt.Sprintf("Successfully found user with user_id %s", request.Id),
 	}, nil
+}
+
+func (handler *Handler) GetUsers(_ context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error) {
+	users, err := handler.UserService.GetUsersByNickname(request.Nickname)
+	if err != nil {
+		return nil, err
+	}
+	return handler.convertUsersToGetUsersResponse(
+			users,
+			fmt.Sprintf("Successfully found all users with nickname %s", request.Nickname)),
+		nil
+}
+
+func (handler *Handler) convertUsersToGetUsersResponse(users []*model.User, message string) *api.GetUsersResponse {
+	var userResponse = make([]*api.UserResponse, 0)
+	for _, user := range users {
+		userResponse = append(userResponse, handler.convertUserToUserResponse(user))
+	}
+	return &api.GetUsersResponse{
+		Users:   userResponse,
+		Message: message,
+	}
+
 }
