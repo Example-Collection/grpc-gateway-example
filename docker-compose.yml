@@ -1,0 +1,11 @@
+version: "1"
+services:
+  demo-dynamodb:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "54000:8000"
+    environment:
+      AWS_ACCESS_KEY_ID: "123"
+      AWS_SECRET_ACCESS_KEY: "123"
+      AWS_REGION: ap-northeast-2
+    command: ["-D\"java.library.path\"=./DynamoDBLocal_lib", "-jar", "DynamoDBLocal.jar"]
