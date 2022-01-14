@@ -2,9 +2,11 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"grpc-gateway-example/model"
 	api "grpc-gateway-example/proto"
 	"grpc-gateway-example/service"
@@ -30,9 +32,11 @@ func (handler *Handler) convertSaveUserRequestToUserModel(request *api.SaveUserR
 }
 
 func (handler *Handler) convertUserToSaveUserResponse(user *model.User) *api.UserResponse {
+	fmt.Printf("converting... %v", user.CreatedAt)
 	return &api.UserResponse{
-		Id:       user.ID,
-		Name:     user.Name,
-		Nickname: user.Nickname,
+		Id:        user.ID,
+		Name:      user.Name,
+		Nickname:  user.Nickname,
+		CreatedAt: timestamppb.New(user.CreatedAt),
 	}
 }

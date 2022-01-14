@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package proto;
 
 option go_package = "./proto";
@@ -25,6 +27,7 @@ message UserResponse {
   string id = 1;
   string name = 2;
   string nickname = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
 
 message GetUserRequest {

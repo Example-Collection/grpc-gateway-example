@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"grpc-gateway-example/config"
 	"grpc-gateway-example/model"
 	"grpc-gateway-example/userdb"
 	"strings"
+	"time"
 )
 
 type Service struct {
@@ -24,6 +26,8 @@ func (service *Service) CreateUser(ctx context.Context, user *model.User) (*mode
 		return nil, errors.Wrapf(err, "uuid.NewUUID() failed. %v", err)
 	}
 	user.ID = userID.String()
+	user.CreatedAt = time.Now()
+	fmt.Printf("createdAt: %v", time.Now())
 	savedUser, err := service.DB.CreateUser(ctx, user)
 	if err != nil {
 		return nil, errors.Wrap(err, "DB.CreateUser() failed")
