@@ -1,83 +1,63 @@
 package main
 
 import (
-	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"context"
+	"flag"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/credentials/insecure"
 	"grpc-gateway-example/config"
 	"grpc-gateway-example/handler"
-	api "grpc-gateway-example/proto"
-	"net"
-	"time"
+	gw "grpc-gateway-example/proto"
+	"grpc-gateway-example/server"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
-func main() {
+var (
+	grpcServerEndpoint = flag.String("grpc-server-endpoint", "localhost:8080", "gRPC server endpoint")
+)
+
+func run() {
 	cfg := config.Init()
+	ctx := context.Background()
+	mux := runtime.NewServeMux()
+
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
+	err := gw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to perform RegisterUserServiceHandlerFromEndpoint()")
+	}
 	h, err := handler.New(cfg)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to make new handler")
 	}
-	grpcServer, err := NewGRPCServer(h, cfg)
+	grpcServer, err := server.NewGRPCServer(h)
 	if err != nil {
 		log.Fatal().Err(err).Msg("NewGRPCServer failed")
 	}
-	grpcServer.ServeGRPC()
+
+	go grpcServer.ServeGRPC()
+	go server.ServeHTTP(mux)
+
+	done := make(chan bool, 1)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	go stop(quit, done)
+	log.Info().Msg("starting server...")
+	<-done
 }
 
-type GRPCServer struct {
-	Server   *grpc.Server
-	listener net.Listener
+func stop(quit <-chan os.Signal, done chan<- bool) {
+	<-quit
+	log.Info().Msg("stopping server...")
+	close(done)
 }
 
-func NewGRPCServer(h *handler.Handler, cfg config.DatabaseConfig) (*GRPCServer, error) {
-	server := grpc.NewServer(
-		grpc.KeepaliveParams(
-			keepalive.ServerParameters{
-				MaxConnectionIdle:     15 * time.Second,
-				MaxConnectionAge:      30 * time.Second,
-				MaxConnectionAgeGrace: 15 * time.Second,
-				Time:                  15 * time.Second,
-				Timeout:               10 * time.Second,
-			},
-		),
-		grpc.KeepaliveEnforcementPolicy(
-			keepalive.EnforcementPolicy{
-				MinTime:             3 * time.Second,
-				PermitWithoutStream: true,
-			},
-		),
-		grpcmiddleware.WithUnaryServerChain(
-			grpcrecovery.UnaryServerInterceptor(
-				grpcrecovery.WithRecoveryHandler(handleRecoveryGRPC),
-			),
-		),
-	)
-
-	api.RegisterUserServiceServer(server, h)
-
-	lis, err := net.Listen("tcp", "localhost:8080")
-	if err != nil {
-		return nil, err
-	}
-
-	return &GRPCServer{
-		Server:   server,
-		listener: lis,
-	}, nil
-}
-
-func handleRecoveryGRPC(p interface{}) error {
-	if err, ok := p.(error); ok {
-		log.Err(err)
-		return err
-	}
-	return nil
-}
-
-func (server *GRPCServer) ServeGRPC() {
-	if err := server.Server.Serve(server.listener); err != nil {
-		log.Fatal().Err(err).Msg("GRPCServer.ServeGRPC() failed")
-	}
+func main() {
+	run()
 }
