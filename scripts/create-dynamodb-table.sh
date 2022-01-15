@@ -10,7 +10,6 @@ aws dynamodb create-table \
   AttributeName=created_at,AttributeType=S \
   --key-schema \
   AttributeName=user_id,KeyType=HASH \
-  AttributeName=nickname,KeyType=RANGE \
   --provisioned-throughput ReadCapacityUnits=10,WriteCapacityUnits=10 \
   --global-secondary-indexes file://scripts/gsi.json \
   --endpoint-url http://localhost:54000 \
