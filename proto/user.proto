@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 package proto;
 
@@ -9,13 +10,26 @@ option go_package = "./proto";
 // 고유한 값: nickname
 service UserService {
   // Get user by id
-  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/user/{id}"
+    };
+  }
 
   // Save new user
-  rpc SaveUser(SaveUserRequest) returns (UserResponse) {}
+  rpc SaveUser(SaveUserRequest) returns (UserResponse) {
+    option (google.api.http) = {
+      post : "/v1/user"
+      body: "*"
+    };
+  }
 
-  // Get users by name
-  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {}
+  // Get users by nickname
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/user/search/{nickname}"
+    };
+  }
 }
 
 message SaveUserRequest {

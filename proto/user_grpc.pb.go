@@ -22,7 +22,7 @@ type UserServiceClient interface {
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	// Save new user
 	SaveUser(ctx context.Context, in *SaveUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
-	// Get users by name
+	// Get users by nickname
 	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
 }
 
@@ -69,7 +69,7 @@ type UserServiceServer interface {
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	// Save new user
 	SaveUser(context.Context, *SaveUserRequest) (*UserResponse, error)
-	// Get users by name
+	// Get users by nickname
 	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
