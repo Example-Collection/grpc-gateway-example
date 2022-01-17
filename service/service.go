@@ -55,12 +55,15 @@ func (service *Service) GetUserByID(userId string) (*model.User, error) {
 	return user, nil
 }
 
-func (service *Service) GetUsersByNickname(name string) ([]*model.User, error) {
+func (service *Service) GetUsersByNickname(name string, page int64, size int64, sort string) ([]*model.User, error) {
 	if strings.Trim(name, " ") == "" {
 		return nil, errors.New("empty name")
 	}
-	users, err := service.DB.GetUsersByNickname(name)
+	users, err := service.DB.GetUsersByNickname(name, sort, page, size)
 	if err != nil {
+		if errors.Is(err, userdb.ErrWrongSortValue) {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid sort value %s", sort)
+		}
 		return nil, status.Errorf(codes.Internal, "Error occurred in while processing GetUsers(), %v", err)
 	}
 	return users, nil

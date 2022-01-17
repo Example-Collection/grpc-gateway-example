@@ -84,10 +84,42 @@ func (db *DB) GetUserByID(userId string) (*model.User, error) {
 	return &user, nil
 }
 
-func (db *DB) GetUsersByNickname(nickname string) ([]*model.User, error) {
+func (db *DB) GetUsersByNickname(nickname string, sort string, page int64, size int64) ([]*model.User, error) {
 	var users []*model.User
-	if err := db.User.Get("nickname", nickname).Index("nickname_idx").All(&users); err != nil {
+
+	dynamoDBSort, err := db.dynamoDBSort(sort)
+	if err != nil {
 		return nil, err
 	}
+
+	query := db.User.Get("nickname", nickname).Index(NicknameIndex.String()).Order(dynamoDBSort)
+	var lastKey dynamo.PagingKey
+
+	for i := int64(0); i <= page; i++ {
+		if i != 0 {
+			users = nil
+		}
+		lastKey, err = query.StartFrom(lastKey).Limit(size).AllWithLastEvaluatedKey(&users)
+		if err != nil {
+			return nil, err
+		}
+		if lastKey == nil {
+			if i < page {
+				users = nil
+			}
+			break
+		}
+	}
 	return users, nil
+}
+
+func (db *DB) dynamoDBSort(sort string) (dynamo.Order, error) {
+	switch sort {
+	case "asc":
+		return dynamo.Ascending, nil
+	case "desc":
+		return dynamo.Descending, nil
+	default:
+		return dynamo.Ascending, ErrWrongSortValue
+	}
 }

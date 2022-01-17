@@ -21,17 +21,11 @@ func NewGRPCServer(h *handler.Handler) (*GRPCServer, error) {
 	server := grpc.NewServer(
 		grpc.KeepaliveParams(
 			keepalive.ServerParameters{
-				MaxConnectionIdle:     15 * time.Second,
-				MaxConnectionAge:      30 * time.Second,
-				MaxConnectionAgeGrace: 15 * time.Second,
+				MaxConnectionIdle:     10 * time.Second,
+				MaxConnectionAge:      20 * time.Second,
+				MaxConnectionAgeGrace: 10 * time.Second,
 				Time:                  15 * time.Second,
 				Timeout:               10 * time.Second,
-			},
-		),
-		grpc.KeepaliveEnforcementPolicy(
-			keepalive.EnforcementPolicy{
-				MinTime:             3 * time.Second,
-				PermitWithoutStream: true,
 			},
 		),
 		grpcmiddleware.WithUnaryServerChain(

@@ -56,7 +56,7 @@ func (handler *Handler) GetUser(_ context.Context, request *api.GetUserRequest) 
 }
 
 func (handler *Handler) GetUsers(_ context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error) {
-	users, err := handler.UserService.GetUsersByNickname(request.Nickname)
+	users, err := handler.UserService.GetUsersByNickname(request.Nickname, request.Page, request.Size, request.Sort)
 	if err != nil {
 		return nil, err
 	}
