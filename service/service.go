@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -10,7 +9,6 @@ import (
 	"grpc-gateway-example/model"
 	"grpc-gateway-example/userdb"
 	"strings"
-	"time"
 )
 
 type Service struct {
@@ -22,13 +20,7 @@ func (service *Service) CreateUser(ctx context.Context, user *model.User) (*mode
 	if err := service.validateUser(user); err != nil {
 		return nil, errors.Wrapf(err, "validateUser failed: name=%s, nickname=%s", user.Name, user.Nickname)
 	}
-	userID, err := uuid.NewUUID()
-	if err != nil {
-		return nil, errors.Wrapf(err, "uuid.NewUUID() failed. %v", err)
-	}
-	user.ID = userID.String()
-	user.CreatedAt = time.Now()
-	savedUser, err := service.DB.CreateUser(ctx, user)
+	savedUser, err := service.DB.CreateUser(ctx, user.New())
 	if err != nil {
 		return nil, errors.Wrap(err, "DB.CreateUser() failed")
 	}
