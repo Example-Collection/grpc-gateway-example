@@ -20,7 +20,7 @@ service UserService {
   rpc SaveUser(SaveUserRequest) returns (UserResponse) {
     option (google.api.http) = {
       post : "/v1/user"
-      body: "*"
+      body: ["nickname, name"]
     };
   }
 

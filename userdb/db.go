@@ -76,15 +76,15 @@ func (db *DB) PutUser(ctx context.Context, user *model.User) error {
 	return nil
 }
 
-func (db *DB) GetUserByID(userId string) (*model.User, error) {
+func (db *DB) GetUserByID(ctx context.Context, userId string) (*model.User, error) {
 	var user model.User
-	if err := db.User.Get("user_id", userId).One(&user); err != nil {
+	if err := db.User.Get("user_id", userId).OneWithContext(ctx, &user); err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (db *DB) GetUsersByNickname(nickname string, sort string, page int64, size int64) ([]*model.User, error) {
+func (db *DB) GetUsersByNickname(ctx context.Context, nickname string, sort string, page int64, size int64) ([]*model.User, error) {
 	var users []*model.User
 
 	dynamoDBSort, err := db.dynamoDBSort(sort)
@@ -99,7 +99,7 @@ func (db *DB) GetUsersByNickname(nickname string, sort string, page int64, size 
 		if i != 0 {
 			users = nil
 		}
-		lastKey, err = query.StartFrom(lastKey).Limit(size).AllWithLastEvaluatedKey(&users)
+		lastKey, err = query.StartFrom(lastKey).Limit(size).AllWithLastEvaluatedKeyContext(ctx, &users)
 		if err != nil {
 			return nil, err
 		}

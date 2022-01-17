@@ -40,8 +40,8 @@ func (handler *Handler) convertUserToUserResponse(user *model.User) *api.UserRes
 	}
 }
 
-func (handler *Handler) GetUser(_ context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
-	user, err := handler.UserService.GetUserByID(request.Id)
+func (handler *Handler) GetUser(ctx context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+	user, err := handler.UserService.GetUserByID(ctx, request.Id)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFoundById) {
 			return nil, status.Errorf(codes.NotFound, "user not found(user_id: %s)", request.Id)
@@ -55,8 +55,8 @@ func (handler *Handler) GetUser(_ context.Context, request *api.GetUserRequest) 
 	}, nil
 }
 
-func (handler *Handler) GetUsers(_ context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error) {
-	users, err := handler.UserService.GetUsersByNickname(request.Nickname, request.Page, request.Size, request.Sort)
+func (handler *Handler) GetUsers(ctx context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error) {
+	users, err := handler.UserService.GetUsersByNickname(ctx, request.Nickname, request.Page, request.Size, request.Sort)
 	if err != nil {
 		return nil, err
 	}

@@ -44,22 +44,22 @@ func New(cfg config.DatabaseConfig, db *userdb.DB) *Service {
 	}
 }
 
-func (service *Service) GetUserByID(userId string) (*model.User, error) {
+func (service *Service) GetUserByID(ctx context.Context, userId string) (*model.User, error) {
 	if strings.Trim(userId, " ") == "" {
 		return nil, errors.New("empty userId")
 	}
-	user, err := service.DB.GetUserByID(userId)
+	user, err := service.DB.GetUserByID(ctx, userId)
 	if err != nil {
 		return nil, ErrUserNotFoundById
 	}
 	return user, nil
 }
 
-func (service *Service) GetUsersByNickname(name string, page int64, size int64, sort string) ([]*model.User, error) {
+func (service *Service) GetUsersByNickname(ctx context.Context, name string, page int64, size int64, sort string) ([]*model.User, error) {
 	if strings.Trim(name, " ") == "" {
 		return nil, errors.New("empty name")
 	}
-	users, err := service.DB.GetUsersByNickname(name, sort, page, size)
+	users, err := service.DB.GetUsersByNickname(ctx, name, sort, page, size)
 	if err != nil {
 		if errors.Is(err, userdb.ErrWrongSortValue) {
 			return nil, status.Errorf(codes.InvalidArgument, "invalid sort value %s", sort)
