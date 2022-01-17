@@ -27,7 +27,7 @@ service UserService {
   // Get users by nickname
   rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
     option (google.api.http) = {
-      get: "/v1/user/search/{nickname}"
+      get: "/v1/user/search"
     };
   }
 }
