@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 	"grpc-gateway-example/config"
 	"grpc-gateway-example/model"
+	"grpc-gateway-example/proto"
 	"grpc-gateway-example/userdb"
 	"strings"
 )
@@ -55,7 +56,7 @@ func (service *Service) GetUserByID(ctx context.Context, userId string) (*model.
 	return user, nil
 }
 
-func (service *Service) GetUsersByNickname(ctx context.Context, name string, page int64, size int64, sort string) ([]*model.User, error) {
+func (service *Service) GetUsersByNickname(ctx context.Context, name string, page int64, size int64, sort proto.Sort) ([]*model.User, error) {
 	if strings.Trim(name, " ") == "" {
 		return nil, errors.New("empty name")
 	}

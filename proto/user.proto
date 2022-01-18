@@ -20,7 +20,7 @@ service UserService {
   rpc SaveUser(SaveUserRequest) returns (UserResponse) {
     option (google.api.http) = {
       post : "/v1/user"
-      body: ["nickname, name"]
+      body: "*"
     };
   }
 
@@ -53,11 +53,16 @@ message GetUserResponse {
   string message = 2;
 }
 
+enum Sort {
+  DESC = 0;
+  ASC = 1;
+}
+
 message GetUsersRequest {
   string nickname = 1;
   int64 page = 2;
   int64 size = 3;
-  string sort = 4;
+  Sort sort = 4;
 }
 
 message GetUsersResponse {

@@ -10,6 +10,7 @@ import (
 	"golang.org/x/net/http2"
 	"grpc-gateway-example/config"
 	"grpc-gateway-example/model"
+	"grpc-gateway-example/proto"
 	"net"
 	"net/http"
 	"time"
@@ -84,7 +85,7 @@ func (db *DB) GetUserByID(ctx context.Context, userId string) (*model.User, erro
 	return &user, nil
 }
 
-func (db *DB) GetUsersByNickname(ctx context.Context, nickname string, sort string, page int64, size int64) ([]*model.User, error) {
+func (db *DB) GetUsersByNickname(ctx context.Context, nickname string, sort proto.Sort, page int64, size int64) ([]*model.User, error) {
 	var users []*model.User
 
 	dynamoDBSort, err := db.dynamoDBSort(sort)
@@ -113,11 +114,11 @@ func (db *DB) GetUsersByNickname(ctx context.Context, nickname string, sort stri
 	return users, nil
 }
 
-func (db *DB) dynamoDBSort(sort string) (dynamo.Order, error) {
+func (db *DB) dynamoDBSort(sort proto.Sort) (dynamo.Order, error) {
 	switch sort {
-	case "asc":
+	case proto.Sort_ASC:
 		return dynamo.Ascending, nil
-	case "desc":
+	case proto.Sort_DESC:
 		return dynamo.Descending, nil
 	default:
 		return dynamo.Ascending, ErrWrongSortValue
