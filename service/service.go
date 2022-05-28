@@ -2,15 +2,14 @@ package service
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"grpc-gateway-example/config"
 	"grpc-gateway-example/model"
+	"grpc-gateway-example/proto"
 	"grpc-gateway-example/userdb"
 	"strings"
-	"time"
 )
 
 type Service struct {
@@ -23,14 +22,7 @@ func (service *Service) CreateUser(ctx context.Context, user *model.User) (*mode
 		return nil, errors.Wrapf(err, "validateUser failed: name=%s, nickname=%s", user.Name, user.Nickname)
 	}
 
-	userID, err := uuid.NewUUID()
-	if err != nil {
-		return nil, errors.Wrapf(err, "uuid.NewUUID() failed. %v", err)
-	}
-
-	user.ID = userID.String()
-	user.CreatedAt = time.Now()
-	savedUser, err := service.DB.CreateUser(ctx, user)
+	savedUser, err := service.DB.CreateUser(ctx, user.New())
 	if err != nil {
 		return nil, errors.Wrap(err, "DB.CreateUser() failed")
 	}
@@ -55,11 +47,11 @@ func New(cfg config.DatabaseConfig, db *userdb.DB) *Service {
 	}
 }
 
-func (service *Service) GetUserByID(userId string) (*model.User, error) {
+func (service *Service) GetUserByID(ctx context.Context, userId string) (*model.User, error) {
 	if strings.Trim(userId, " ") == "" {
 		return nil, errors.New("empty userId")
 	}
-	user, err := service.DB.GetUserByID(userId)
+	user, err := service.DB.GetUserByID(ctx, userId)
 	if err != nil {
 		return nil, ErrUserNotFoundById
 	}
@@ -67,12 +59,15 @@ func (service *Service) GetUserByID(userId string) (*model.User, error) {
 	return user, nil
 }
 
-func (service *Service) GetUsersByNickname(name string) ([]*model.User, error) {
+func (service *Service) GetUsersByNickname(ctx context.Context, name string, page int64, size int64, sort proto.Sort) ([]*model.User, error) {
 	if strings.Trim(name, " ") == "" {
 		return nil, errors.New("empty name")
 	}
-	users, err := service.DB.GetUsersByNickname(name)
+	users, err := service.DB.GetUsersByNickname(ctx, name, sort, page, size)
 	if err != nil {
+		if errors.Is(err, userdb.ErrWrongSortValue) {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid sort value %s", sort)
+		}
 		return nil, status.Errorf(codes.Internal, "Error occurred in while processing GetUsers(), %v", err)
 	}
 

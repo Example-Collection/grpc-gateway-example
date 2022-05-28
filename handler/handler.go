@@ -9,8 +9,6 @@ import (
 
 type Handler struct {
 	api.UnimplementedUserServiceServer
-
-	UserDB      *userdb.DB
 	UserService *service.Service
 }
 
@@ -22,7 +20,6 @@ func New(cfg config.DatabaseConfig) (*Handler, error) {
 
 	userService := service.New(cfg, userDB)
 	return &Handler{
-		UserDB:      userDB,
 		UserService: userService,
 	}, nil
 }
