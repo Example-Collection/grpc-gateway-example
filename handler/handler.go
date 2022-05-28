@@ -19,6 +19,7 @@ func New(cfg config.DatabaseConfig) (*Handler, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	userService := service.New(cfg, userDB)
 	return &Handler{
 		UserDB:      userDB,

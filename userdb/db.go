@@ -53,9 +53,7 @@ func New(dbConfig config.DatabaseConfig) (*DB, error) {
 	}
 
 	database := dynamo.New(newSession)
-	if err != nil {
-		return nil, err
-	}
+
 	return &DB{
 		DB:   database,
 		User: database.Table(dbConfig.User),

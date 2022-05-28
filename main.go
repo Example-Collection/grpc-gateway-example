@@ -28,14 +28,16 @@ func run() {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
-	err := gw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts)
-	if err != nil {
+
+	if err := gw.RegisterUserServiceHandlerFromEndpoint(ctx, mux, *grpcServerEndpoint, opts); err != nil {
 		log.Fatal().Err(err).Msg("failed to perform RegisterUserServiceHandlerFromEndpoint()")
 	}
+
 	h, err := handler.New(cfg)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to make new handler")
 	}
+
 	grpcServer, err := server.NewGRPCServer(h)
 	if err != nil {
 		log.Fatal().Err(err).Msg("NewGRPCServer failed")

@@ -22,16 +22,19 @@ func (service *Service) CreateUser(ctx context.Context, user *model.User) (*mode
 	if err := service.validateUser(user); err != nil {
 		return nil, errors.Wrapf(err, "validateUser failed: name=%s, nickname=%s", user.Name, user.Nickname)
 	}
+
 	userID, err := uuid.NewUUID()
 	if err != nil {
 		return nil, errors.Wrapf(err, "uuid.NewUUID() failed. %v", err)
 	}
+
 	user.ID = userID.String()
 	user.CreatedAt = time.Now()
 	savedUser, err := service.DB.CreateUser(ctx, user)
 	if err != nil {
 		return nil, errors.Wrap(err, "DB.CreateUser() failed")
 	}
+
 	return savedUser, nil
 }
 
@@ -60,6 +63,7 @@ func (service *Service) GetUserByID(userId string) (*model.User, error) {
 	if err != nil {
 		return nil, ErrUserNotFoundById
 	}
+
 	return user, nil
 }
 
@@ -71,5 +75,6 @@ func (service *Service) GetUsersByNickname(name string) ([]*model.User, error) {
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Error occurred in while processing GetUsers(), %v", err)
 	}
+
 	return users, nil
 }
